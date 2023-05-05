@@ -14,23 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-ARG java_image_tag=17-jre
 
-FROM eclipse-temurin:${java_image_tag}
+# AUGMENT
+# We're basically layering the existing spark container on top of the standard
+# augment container
 
-ARG spark_uid=185
+ARG base_image=au-docker-reg.tenant-augment-eng.ord1.ingress.coreweave.cloud/dai_base:cuda-11.7
+FROM $base_image
+
+# Augment user ID
+ARG spark_uid=1000
 
 # Before building the docker image, first build and make a Spark distribution following
 # the instructions in https://spark.apache.org/docs/latest/building-spark.html.
 # If this docker file is being used in the context of building your images from a Spark
 # distribution, the docker build command should be invoked from the top level directory
 # of the Spark distribution. E.g.:
-# docker build -t spark:latest -f kubernetes/dockerfiles/spark/Dockerfile .
+# docker build -t augment_spark:latest -f kubernetes/dockerfiles/spark/Dockerfile .
 
 RUN set -ex && \
     apt-get update && \
     ln -s /lib /lib64 && \
-    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps net-tools && \
+    apt install -y \
+        default-jdk \
+        bash \
+        tini \
+        libc6 \
+        libpam-modules \
+        krb5-user \
+        libnss3 \
+        procps \
+        net-tools && \
     mkdir -p /opt/spark && \
     mkdir -p /opt/spark/examples && \
     mkdir -p /opt/spark/work-dir && \
@@ -53,7 +67,7 @@ COPY data /opt/spark/data
 ENV SPARK_HOME /opt/spark
 
 WORKDIR /opt/spark/work-dir
-RUN chmod g+w /opt/spark/work-dir
+RUN chmod a+w /opt/spark/work-dir
 RUN chmod a+x /opt/decom.sh
 
 ENTRYPOINT [ "/opt/entrypoint.sh" ]

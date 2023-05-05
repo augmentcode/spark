@@ -15,6 +15,10 @@
 # limitations under the License.
 #
 
+# AUGMENT
+# Set the base_img to the correct augment image, probably
+# docker build -t augment_spark_python:latest --build_arg base_img=augment_spark:latest -f kubernetes/dockerfiles/spark/bindings/python/Dockerfile .
+
 ARG base_img
 
 FROM $base_img
@@ -37,5 +41,5 @@ WORKDIR /opt/spark/work-dir
 ENTRYPOINT [ "/opt/entrypoint.sh" ]
 
 # Specify the User that the actual main process will run as
-ARG spark_uid=185
+ARG spark_uid=1000
 USER ${spark_uid}

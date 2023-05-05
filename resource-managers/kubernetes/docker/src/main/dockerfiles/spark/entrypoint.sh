@@ -112,4 +112,9 @@ case "$1" in
 esac
 
 # Execute the container CMD under tini for better hygiene
-exec /usr/bin/tini -s -- "${CMD[@]}"
+# exec /usr/bin/tini -s -- "${CMD[@]}"
+
+# AUGMENT activate the conda env, then run the python
+eval "$(conda shell.bash hook)"
+conda activate augment_env
+${CMD[@]}
